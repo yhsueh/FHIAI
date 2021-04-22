@@ -1,0 +1,81 @@
+1. Training data format is different between Yolo_mark and keras_yolo
+2. voc_annotation
+3. yolo_obj.cfg (why are there multiple convolution****)
+classes = 2
+train  = data/train.txt
+valid  = data/test.txt
+names = data/obj.names
+backup = backup/
+
+
+
+4. anchor boxes vs bounding boxes
+5. conv_ReLU why taking only postivie part
+6. 每個方格中判斷BOUDNING Boxes confidence score (how?)
+7. Simultaneously implementing CNN on multiple Bounding boxes.
+
+
+Version Dependency
+Tensorflow
+CUDA
+Python
+
+
+GPU for traning purpose
+
+Object Detection:
+mAP-50 accuracy
+
+
+Alex improves YOLO performance and is written in C++.
+Keras uses the original YOLOv3 algorthim.
+
+Train with Alex Yolo; and test with Keras.
+
+
+
+
+Three Critical Elements:
+weights.
+
+yolo3_608.cfg
+
+dark_net_no_GPU.exe
+
+
+
+
+Read by Darknet:
+obj.data file under yolo folder
+
+classes= 1
+train  = C:\Users\user\Desktop\Yolo_mark\data\train.txt
+valid  = C:\Users\user\Desktop\Yolo_mark\data\train.txt
+names = C:\Users\user\Desktop\Yolo_mark\data/obj.names
+backup = ../yolo/backup  // where weights are saved
+
+FHI.cmd change Data path.
+
+-Use nvcc -V to check CUDA version.
+
+FHI.cmd change Bin Path.
+
+
+Continue training
+change Latest_MDL path in cofig file
+change INIT_WEIGHT to Latest_MDL
+
+Changable parameters 
+Training batch and subdivision
+max_batches
+
+
+refer to github.com/AlexeyAB/darknet readme file for anchor box fomula
+
+Testing:
+//Must match with training parameters
+YOLO _default = {
+	model_path
+	anchor_path
+	classes
+}

@@ -5,6 +5,8 @@
 logs/
 *_test.py
 *.idea
+output_image/
+test_image/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

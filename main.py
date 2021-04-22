@@ -3,7 +3,7 @@ import os
 from PIL import Image
 
 dirname = os.path.dirname(__file__)
-image_name = 'File_007.jpeg'
+image_name = '002.jfif'
 image_path = os.path.join(dirname, 'test_image/' + image_name)
 
 image = Image.open(image_path)
