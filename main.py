@@ -10,12 +10,15 @@ def detect_image(path):
     image = Image.open(path)
     yolo_obj = yolo.YOLO()
     r_image = yolo_obj.detect_image(image=image)
-    save_path = os.path.join(dirname, 'output_image/' + path[-5:])
+    save_path = os.path.join(dirname, 'output_image/' + path[-7:])
     r_image.save(save_path)
 
 
 def main():
-    for path in glob.glob('test_image/*.jpg'):
+    i = 0
+    for path in glob.glob('test_image/*.jpeg'):
+        i += 1
+        print(i)
         image_path = os.path.join(dirname, path)
         detect_image(image_path)
 
