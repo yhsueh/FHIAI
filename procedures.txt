@@ -1,0 +1,40 @@
+Training Procedure
+YoloMark:
+1. In yolo_mark.cmd batch file, execute yolo_mark.exe [Path to the image file] [path to train.txt ###execute dir *.jpeg /b/s -> train.txt] [obj.names ###class name]
+
+2. Modify training images configuration file, obj.data.
+classes= 3
+train  = ..\Yolo_mark\data\pipe_panel\train.txt
+valid  =  ..\Yolo_mark\data\pipe_panel\train.txt
+names = ..\Yolo_mark\data\obj.names
+backup = ..\Yolo_mark\data\backup
+
+Alex Yolo
+1. Modify alex training batch file containing following parameters: 
+set path=%path%;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0\bin
+rem LASTEST_MDL=weightsTmp/yolo-obj_11500.weights
+set BIN=darknet-cuda9.0.exe
+set CFG=cfg/yolov3_608.cfg
+set INIT_WEIGHTS=weights/darknet53.conv.74
+set DATA=C:\Users\YuyuHsueh\PycharmProjects\Yolo_mark\data\obj.data
+set TEST_FAIL_FN=data\action0907\fold_list\filelist-fail-test0.txt
+set TEST_PASS_FN=data\action0907\filelist-pass.txt
+
+2. Configure CFG file, especially filter and class number.
+filters = (classes+5)*3
+
+
+Testing Procedure
+1. Modify yolov3.cfg. Ensure the training parameters are consistent with testing parameters.
+2. Execute "python convert.py yolov3.cfg yolov3.weights model_data/yolo.h5" in cmd
+3. Modify yolo detection parameters accordingly:
+    _defaults = {
+        "model_path": 'model_data/yolo.h5',
+        "anchors_path": 'model_data/yolo_anchors.txt',
+        "classes_path": 'model_data/coco_classes.txt',
+        "score" : 0.3,
+        "iou" : 0.45,
+        "model_image_size" : (416, 416),
+        "gpu_num" : 1,
+    }
+4. Run python script.

@@ -11,18 +11,18 @@ import numpy as np
 from keras import backend as K
 from keras.models import load_model
 from keras.layers import Input
+from keras.utils import multi_gpu_model
 from PIL import Image, ImageFont, ImageDraw
 
 from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
 from yolo3.utils import letterbox_image
 import os
-from keras.utils import multi_gpu_model
 
 class YOLO(object):
     _defaults = {
-        "model_path": 'model_data/yolo.h5',
+        "model_path": 'model_data/yolov3_final.h5',
         "anchors_path": 'model_data/yolo_anchors.txt',
-        "classes_path": 'model_data/accessory_classes.txt',
+        "classes_path": 'model_data/FHI_classes.txt',
         "score" : 0.3,
         "iou" : 0.45,
         "model_image_size" : (608, 608),
@@ -99,8 +99,9 @@ class YOLO(object):
                 score_threshold=self.score, iou_threshold=self.iou)
         return boxes, scores, classes
 
-    def detect_image(self, image):
+    def detect_image(self, image, draw_flag=True):
         start = timer()
+        adjusted_out_boxes = []
 
         if self.model_image_size != (None, None):
             assert self.model_image_size[0]%32 == 0, 'Multiples of 32 required'
@@ -126,9 +127,12 @@ class YOLO(object):
 
         print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
 
+        #font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
+        #           size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
-                    size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
-        thickness = (image.size[0] + image.size[1]) // 300
+                    size=np.floor(1e-2 * image.size[1] + 0.1).astype('int32'))
+        #thickness = (image.size[0] + image.size[1]) // 300
+        thickness = (image.size[0] + image.size[1]) // 900
 
         for i, c in reversed(list(enumerate(out_classes))):
             predicted_class = self.class_names[c]
@@ -144,27 +148,29 @@ class YOLO(object):
             left = max(0, np.floor(left + 0.5).astype('int32'))
             bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
             right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
-            print(label, (left, top), (right, bottom))
+            adjusted_out_boxes.append((left, top, right, bottom))
+            print((left, top, right, bottom))
 
             if top - label_size[1] >= 0:
                 text_origin = np.array([left, top - label_size[1]])
             else:
                 text_origin = np.array([left, top + 1])
 
-            # My kingdom for a good redistributable image drawing library.
-            for i in range(thickness):
+            if draw_flag:
+                # My kingdom for a good redistributable image drawing library.
+                for i in range(thickness):
+                    draw.rectangle(
+                        [left + i, top + i, right - i, bottom - i],
+                        outline=self.colors[c])
                 draw.rectangle(
-                    [left + i, top + i, right - i, bottom - i],
-                    outline=self.colors[c])
-            draw.rectangle(
-                [tuple(text_origin), tuple(text_origin + label_size)],
-                fill=self.colors[c])
-            draw.text(text_origin, label, fill=(0, 0, 0), font=font)
-            del draw
+                    [tuple(text_origin), tuple(text_origin + label_size)],
+                    fill=self.colors[c])
+                draw.text(text_origin, label, fill=(0, 0, 0), font=font)
+                del draw
 
         end = timer()
         print(end - start)
-        return image
+        return image, adjusted_out_boxes
 
     def close_session(self):
         self.sess.close()

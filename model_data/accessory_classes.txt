@@ -1,3 +1,0 @@
-accessory1
-accessory2
-accessory3
