@@ -3,6 +3,7 @@
 *.weights
 *.h5
 logs/
+weights/
 *_test.py
 *.idea
 /output_image
