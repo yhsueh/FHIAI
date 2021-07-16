@@ -112,8 +112,6 @@ class YOLO(object):
                               image.height - (image.height % 32))
             boxed_image = letterbox_image(image, new_image_size)
         image_data = np.array(boxed_image, dtype='float32')
-
-        print(image_data.shape)
         image_data /= 255.
         image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 
@@ -125,7 +123,7 @@ class YOLO(object):
                 K.learning_phase(): 0
             })
 
-        print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
+        print('Found {} boxes for'.format(len(out_boxes)))
 
         #font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
         #           size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
@@ -149,7 +147,7 @@ class YOLO(object):
             bottom = min(image.size[1], np.floor(bottom + 0.5).astype('int32'))
             right = min(image.size[0], np.floor(right + 0.5).astype('int32'))
             adjusted_out_boxes.append((left, top, right, bottom))
-            print((left, top, right, bottom))
+            #print((left, top, right, bottom))
 
             if top - label_size[1] >= 0:
                 text_origin = np.array([left, top - label_size[1]])
@@ -169,8 +167,14 @@ class YOLO(object):
                 del draw
 
         end = timer()
-        print(end - start)
-        return image, adjusted_out_boxes
+        #print(end - start)
+
+        r = {
+            'result_img' : image,
+            'rois' : adjusted_out_boxes,
+            'class_ids' : out_classes
+        }
+        return r
 
     def close_session(self):
         self.sess.close()
