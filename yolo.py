@@ -5,9 +5,11 @@ Class definition of YOLO_v3 style detection model on image and video
 
 import colorsys
 import os
+import sys
 from timeit import default_timer as timer
 
 import numpy as np
+import cv2
 from keras import backend as K
 from keras.models import load_model
 from keras.layers import Input
@@ -16,7 +18,6 @@ from PIL import Image, ImageFont, ImageDraw
 
 from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
 from yolo3.utils import letterbox_image
-import os
 
 class YOLO(object):
     _defaults = {
@@ -100,6 +101,7 @@ class YOLO(object):
         return boxes, scores, classes
 
     def detect_image(self, image, draw_flag=True):
+        result_image = image.copy()
         start = timer()
         adjusted_out_boxes = []
 
@@ -138,7 +140,7 @@ class YOLO(object):
             score = out_scores[i]
 
             label = '{} {:.2f}'.format(predicted_class, score)
-            draw = ImageDraw.Draw(image)
+            draw = ImageDraw.Draw(result_image)
             label_size = draw.textsize(label, font)
 
             top, left, bottom, right = box
@@ -169,10 +171,19 @@ class YOLO(object):
         end = timer()
         #print(end - start)
 
+
+        # Convert PIL Image to numpy array
+        image = np.array(image)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        result_image = np.array(result_image)
+
+        # Store the detection result in dictionary form 
+        # Note class_ids are listed in reverse order
         r = {
-            'result_img' : image,
+            'original_img' : image, 
+            'result_img' : result_image,
             'rois' : adjusted_out_boxes,
-            'class_ids' : out_classes
+            'class_ids' : out_classes[::-1]
         }
         return r
 

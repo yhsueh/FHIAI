@@ -1,15 +1,17 @@
-from PIL import Image
-import yolo
 import os
 import glob
 import argparse
 import sys
+
+from PIL import Image
+
+import yolo
 import fhi_util as fu
 
 def main(img_dir, weights):
     result_yolo = fu.yolo_detection(img_dir, weights)
     fu.unet_detection(result_yolo)
-    unet_data = fu.yolo_unet_converter(result_yolo)
+    #unet_data = fu.yolo_unet_converter(result_yolo)
     
   
 if __name__ == '__main__':
