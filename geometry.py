@@ -19,6 +19,11 @@ class Point():
 		intercept = self.y - slope*self.x
 		return slope, intercept
 
+	def add_point(self, point):
+		self.x += point[0]
+		self.y += point[1]
+		return self
+
 	def switch_coordinate_system(self, img):
 		# OpenCV image coordinate:| Math coordinate:    
 		# ----->x                 | y

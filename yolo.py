@@ -174,6 +174,7 @@ class YOLO(object):
 
         # Convert PIL Image to numpy array
         image = np.array(image)
+        print('yolo size:', image.shape)
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         result_image = np.array(result_image)
 
