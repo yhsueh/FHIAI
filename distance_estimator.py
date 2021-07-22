@@ -16,9 +16,7 @@ class DistanceEstimator():
 		self.scale_length = 100
 
 	def initialize(self):
-		print('find_scales')
 		self.__find_scales()
-		print('form_reference')
 		self.__form_reference_points()
 		self.__shift_accessory_coordinate_init()
 		print('Estimator initialized')
@@ -64,8 +62,7 @@ class DistanceEstimator():
 									   mode=cv2.RETR_EXTERNAL,
 									   method=cv2.CHAIN_APPROX_SIMPLE)
 
-		### Discard contours with area less than 4000 ###
-		### Discard contours that are not quadrilaterals ###
+		### Discard contours that are not quadrilaterals and smaller than 4000 pixels###
 		result_contours = {}
 		epsilon = 30
 		minimal_area = 3000
@@ -85,14 +82,7 @@ class DistanceEstimator():
 			self.far_scale = result_contours[key_list[1]]
 		else:
 			print('Contours Found', len(result_contours.keys()))
-			raise Exception('ERROR: More or fewer than two contours are found!')
-
-	def test_draw_contour_pts(self, contour, color, img=None):
-		if img is None:
-			img = self.img.copy()
-		for pt in contour:
-			img = cv2.circle(img, tuple(pt[0]), 2, color, 5)
-		return img
+			raise Exception('Error: More or fewer than two contours are found!')
 
 	def __verify_shape(self, result_contours):
 		tolerance = 0.15

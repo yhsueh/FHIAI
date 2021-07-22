@@ -20,6 +20,10 @@ class ImgCoord():
 	def get_point_of_interest(self):
 		raise NotImplementedError()
 
+	def update_interest_pt(self, pt):
+		self.x_interest = pt[0]
+		self.y_interest = pt[1]
+
 class Type1_2Coord(ImgCoord):
 	def __init__(self, info):
 		super().__init__(info)
