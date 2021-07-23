@@ -17,18 +17,26 @@ def yolo_detection(img_dir, weights):
 	img_dir = os.path.join(os.getcwd(), img_dir)
 	yl = yolo.YOLO(model_path=weights)
 	yl_results = []
-	
-	#detect_imgs = ['Panel1', 'Panel4', 'Panel5', 'Panel9']
-	for img_path in glob.glob(img_dir + r'\*.jpg'):
-		#basename = os.path.splitext(os.path.basename(img_path))[0]
-		#if basename not in detect_imgs:
-		#	continue
 
+	# create yolo_output_dir if it doesn't exist
+	yl_output_dir = os.path.join(img_dir, 'yolo_output')
+	if not os.path.exists(yl_output_dir):
+		os.mkdir(yl_output_dir)
+	
+	for img_path in glob.glob(img_dir + r'\*.jpg'):
 		print('Processing:', img_path)
 		img = Image.open(img_path)
 		result = yl.detect_image(img, True)
+
+		# save yolo image result
+		basename = os.path.basename(img_path)
+		yl_save_path = os.path.join(yl_output_dir, basename)
+		cv2.imwrite(yl_save_path, cv2.cvtColor(result['result_img'], cv2.COLOR_BGR2RGB))
+
+		# add image path to yolo result dictionary
 		result.update({'img_path' : img_path})
 		yl_results.append(result)
+		sys.exit()
 	return yl_results
 
 def create_masks(un, yl_results):

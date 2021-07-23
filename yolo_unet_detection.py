@@ -11,9 +11,7 @@ import fhi_util as fu
 def main(img_dir, weights):
     result_yolo = fu.yolo_detection(img_dir, weights)
     fu.unet_detection(result_yolo)
-    #unet_data = fu.yolo_unet_converter(result_yolo)
-    
-  
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Yolo image detection process')
     parser.add_argument('--weights', required= True,
