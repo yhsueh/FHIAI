@@ -18,11 +18,11 @@ def yolo_detection(img_dir, weights):
 	yl = yolo.YOLO(model_path=weights)
 	yl_results = []
 	
-	detect_imgs = ['Panel1', 'Panel4', 'Panel5', 'Panel9']
+	#detect_imgs = ['Panel1', 'Panel4', 'Panel5', 'Panel9']
 	for img_path in glob.glob(img_dir + r'\*.jpg'):
-		basename = os.path.splitext(os.path.basename(img_path))[0]
-		if basename not in detect_imgs:
-			continue
+		#basename = os.path.splitext(os.path.basename(img_path))[0]
+		#if basename not in detect_imgs:
+		#	continue
 
 		print('Processing:', img_path)
 		img = Image.open(img_path)
@@ -160,4 +160,3 @@ def compute_distance(yl_result):
 	plt.imshow(img)
 	print('Saved path', img_path)
 	plt.savefig(img_path, dpi=300)
-

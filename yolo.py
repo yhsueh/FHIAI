@@ -102,7 +102,7 @@ class YOLO(object):
 
     def detect_image(self, image, draw_flag=True):
         result_image = image.copy()
-        start = timer()
+
         adjusted_out_boxes = []
 
         if self.model_image_size != (None, None):
@@ -117,6 +117,7 @@ class YOLO(object):
         image_data /= 255.
         image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 
+        start = timer()
         out_boxes, out_scores, out_classes = self.sess.run(
             [self.boxes, self.scores, self.classes],
             feed_dict={
@@ -125,13 +126,12 @@ class YOLO(object):
                 K.learning_phase(): 0
             })
 
-        print('Found {} boxes'.format(len(out_boxes)))
+        end = timer()
+        print('time spent', end - start)
 
-        #font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
-        #           size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
+        print('Found {} boxes'.format(len(out_boxes)))
         font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
                     size=np.floor(1e-2 * image.size[1] + 0.1).astype('int32'))
-        #thickness = (image.size[0] + image.size[1]) // 300
         thickness = (image.size[0] + image.size[1]) // 900
 
         for i, c in reversed(list(enumerate(out_classes))):
@@ -167,9 +167,6 @@ class YOLO(object):
                     fill=self.colors[c])
                 draw.text(text_origin, label, fill=(0, 0, 0), font=font)
                 del draw
-
-        end = timer()
-        #print(end - start)
 
         # Convert PIL Image to numpy array
         image = np.array(image)
