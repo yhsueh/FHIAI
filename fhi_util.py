@@ -36,7 +36,6 @@ def yolo_detection(img_dir, weights):
 		# add image path to yolo result dictionary
 		result.update({'img_path' : img_path})
 		yl_results.append(result)
-		sys.exit()
 	return yl_results
 
 def create_masks(un, yl_results):
@@ -163,6 +162,12 @@ def compute_distance(yl_result):
 
 	print('Process completed')
 	img_path = yl_result['img_path']
+	
+	# create distance directory if it doesn't exist
+	distance_dir = os.path.join(os.path.dirname(img_path), 'distance')
+	if not os.path.exists(distance_dir):
+		os.mkdir(distance_dir)
+
 	img_path = img_path.replace('dataset', r'dataset\distance')
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 	plt.imshow(img)
