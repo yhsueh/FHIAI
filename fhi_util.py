@@ -17,13 +17,18 @@ def yolo_detection(img_dir, weights):
 	img_dir = os.path.join(os.getcwd(), img_dir)
 	yl = yolo.YOLO(model_path=weights)
 	yl_results = []
-	for img_path in glob.glob(img_dir + r'\*2507.jpg'):
+	
+	detect_imgs = ['Panel1', 'Panel4', 'Panel5', 'Panel9']
+	for img_path in glob.glob(img_dir + r'\*.jpg'):
+		basename = os.path.splitext(os.path.basename(img_path))[0]
+		if basename not in detect_imgs:
+			continue
+
+		print('Processing:', img_path)
 		img = Image.open(img_path)
-		result = yl.detect_image(img)
+		result = yl.detect_image(img, True)
+		result.update({'img_path' : img_path})
 		yl_results.append(result)
-		# Yolo detects only one image
-		break
-	yl.close_session()
 	return yl_results
 
 def create_masks(un, yl_results):
@@ -129,13 +134,13 @@ def compute_distance(yl_result):
 		cropped_img = cropped_imgs[i]
 		pt_itr = None
 
-		if class_id == 0:
+		if class_id == 0 or class_id == 1:
 			accessory = ic.Type1_2Coord(info)
 			pt_itr = accessory.get_point_of_interest()
 			pt_itr = resize_restoration(pt_itr, cropped_img.shape).add_point(mask_coord)			
 			accessory.update_interest_pt(pt_itr.get_point_tuple())
 			img = accessory.draw_point_of_interest(img)
-		elif class_id == 3:
+		elif class_id == 2 or class_id == 3:
 			accessory = ic.Type3_4Coord(info)
 			pt_itr = accessory.get_point_of_interest()
 			pt_itr = resize_restoration(pt_itr, cropped_img.shape).add_point(mask_coord)			
@@ -146,10 +151,13 @@ def compute_distance(yl_result):
 
 		# Distance estimator
 		caption = estimator.estimate(pt_itr)
-		ax.text(roi[0]+10, roi[1] + 30, caption, color='lime', weight='bold', size=6, backgroundcolor="none")
+		ax.text(roi[0], roi[1], caption, color='lime', weight='bold', size=6, backgroundcolor="none")
 
 	print('Process completed')
+	img_path = yl_result['img_path']
+	img_path = img_path.replace('dataset', r'dataset\distance')
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 	plt.imshow(img)
-	plt.show()
+	print('Saved path', img_path)
+	plt.savefig(img_path, dpi=300)
 

@@ -125,7 +125,7 @@ class YOLO(object):
                 K.learning_phase(): 0
             })
 
-        print('Found {} boxes for'.format(len(out_boxes)))
+        print('Found {} boxes'.format(len(out_boxes)))
 
         #font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
         #           size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
@@ -171,10 +171,8 @@ class YOLO(object):
         end = timer()
         #print(end - start)
 
-
         # Convert PIL Image to numpy array
         image = np.array(image)
-        print('yolo size:', image.shape)
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         result_image = np.array(result_image)
 

@@ -65,7 +65,7 @@ class DistanceEstimator():
 		### Discard contours that are not quadrilaterals and smaller than 4000 pixels###
 		result_contours = {}
 		epsilon = 30
-		minimal_area = 3000
+		minimal_area = 2000
 		for contour in contours:
 			contour_area = cv2.contourArea(contour)
 			if contour_area > minimal_area:
@@ -85,7 +85,7 @@ class DistanceEstimator():
 			raise Exception('Error: More or fewer than two contours are found!')
 
 	def __verify_shape(self, result_contours):
-		tolerance = 0.15
+		tolerance = 0.40
 		remove_keys = []
 
 		for key in result_contours.keys():

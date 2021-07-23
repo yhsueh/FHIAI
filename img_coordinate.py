@@ -3,6 +3,7 @@ import os
 
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
 
 from geometry import Point
 
@@ -44,7 +45,7 @@ class Type1_2Coord(ImgCoord):
 		selected_pts_y = pts_y[selected_pts_mask]
 		selected_pts_uy = np.mean(selected_pts_y)
 
-		### Find min y that is also greater than y_mean ###
+		### Find min y that is greater than y_mean ###
 		conditioned_min_y = 99999
 		for i, y in enumerate(selected_pts_y):
 			if y < conditioned_min_y and y > selected_pts_uy:
