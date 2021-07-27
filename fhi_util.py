@@ -13,7 +13,6 @@ import img_coordinate as ic
 import fhi_unet as unet
 import geometry as ge
 
-
 def yolo_detection(img_dir, weights):
 	img_dir = os.path.join(os.getcwd(), img_dir)
 	yl = yolo.YOLO(model_path=weights)
@@ -37,8 +36,6 @@ def yolo_detection(img_dir, weights):
 		# add image path to yolo result dictionary
 		result.update({'img_path' : img_path})
 		yl_results.append(result)
-
-		break
 	return yl_results
 
 def create_masks(un, yl_results, un_output_dir):
@@ -68,7 +65,10 @@ def create_masks(un, yl_results, un_output_dir):
 			mask = un.detect(cropped_img)
 
 			# Save masks
-			mask_save_path = os.path.join(un_output_dir, os.path.basename(yl_result['img_path']))
+			basename = os.path.basename(yl_result['img_path'])
+			filename = os.path.splitext(basename)[0]
+			mask_save_path = os.path.join(un_output_dir, basename)
+			mask_save_path = mask_save_path.replace(filename, filename + r'_{}'.format(i))
 			cv2.imwrite(mask_save_path, mask)
 
 			# Image Processing
@@ -152,14 +152,12 @@ def compute_distance(yl_result):
 			pt_itr = resize_restoration(pt_itr, cropped_img.shape).add_point(mask_coord)			
 			accessory.update_interest_pt(pt_itr.get_point_tuple())
 			img = accessory.draw_point_of_interest(img)
-		elif class_id == 2 or class_id == 3:
+		else:
 			accessory = ic.Type3_4Coord(info)
 			pt_itr = accessory.get_point_of_interest()
 			pt_itr = resize_restoration(pt_itr, cropped_img.shape).add_point(mask_coord)			
 			accessory.update_interest_pt(pt_itr.get_point_tuple())
 			img = accessory.draw_point_of_interest(img)
-		else:
-			continue
 
 		# Distance estimator
 		caption = estimator.estimate(pt_itr)
@@ -176,5 +174,4 @@ def compute_distance(yl_result):
 	img_path = img_path.replace('dataset', r'dataset\distance')
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 	plt.imshow(img)
-	print('Saved path', img_path)
 	plt.savefig(img_path, dpi=300)
