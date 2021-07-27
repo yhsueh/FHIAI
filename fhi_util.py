@@ -5,6 +5,7 @@ import sys
 from matplotlib import pyplot as plt
 from PIL import Image
 import cv2
+import numpy as np
 
 import yolo
 import distance_estimator as de
@@ -36,9 +37,11 @@ def yolo_detection(img_dir, weights):
 		# add image path to yolo result dictionary
 		result.update({'img_path' : img_path})
 		yl_results.append(result)
+
+		break
 	return yl_results
 
-def create_masks(un, yl_results):
+def create_masks(un, yl_results, un_output_dir):
 	def enlarge_roi(roi):
 		center = ((roi[0] + roi[2])/2, (roi[1] + roi[3])/2)
 		width = 1.4*(roi[2] - roi[0])
@@ -52,6 +55,7 @@ def create_masks(un, yl_results):
 		cropped_imgs = []
 		masks = []
 		mask_coords = []
+
 		for i, roi in enumerate(yl_result['rois']):
 			# Enlarge the roi boundry acquired from Yolo
 			roi = enlarge_roi(roi)
@@ -63,21 +67,17 @@ def create_masks(un, yl_results):
 			# UNet Detection
 			mask = un.detect(cropped_img)
 
+			# Save masks
+			mask_save_path = os.path.join(un_output_dir, os.path.basename(yl_result['img_path']))
+			cv2.imwrite(mask_save_path, mask)
+
 			# Image Processing
 			morphology_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
 			dilation = cv2.dilate(mask, morphology_kernel, iterations=3)
 			mask = cv2.erode(dilation, morphology_kernel, iterations=3)
 			_, mask = cv2.threshold(mask, 255/2, 255, cv2.THRESH_BINARY)
-			
-			# Render Result
-			'''
-			_, ax = plt.subplots(2)
-			ax[0].imshow(cropped_img)
-			ax[1].imshow(mask)
-			plt.show()
-			'''
 
-			#saved_path = os.path.join(os.getcwd(), r'{}.jpg'.format(i))
+			# Save results
 			cropped_imgs.append(cropped_img)
 			masks.append(mask)
 			mask_coords.append(mask_coord)
@@ -89,12 +89,17 @@ def create_masks(un, yl_results):
 	for yl_result in yl_results:
 		unet_crop(yl_result)
 
-def unet_detection(yl_results):
+def unet_detection(img_dir, yl_results):
+	# Create unet_output_dir if it doesn't exis
+	un_output_dir = os.path.join(img_dir, 'unet_output')
+	if not os.path.exists(un_output_dir):
+		os.mkdir(un_output_dir)
+	
+	# Start unet detection
+	print('#### unet initialization completed ####')
 	un = unet.UNET()
 	un.initialize()
-	print('#### unet initialization completed ####')
-
-	create_masks(un, yl_results)
+	create_masks(un, yl_results, un_output_dir)
 	un.close_session()
 	
 	print('#### Begin computing real-world distance ####')

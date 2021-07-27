@@ -2,6 +2,8 @@ import os
 import glob
 import argparse
 import sys
+import warnings
+warnings.filterwarnings('ignore', category=FutureWarning)
 
 from PIL import Image
 
@@ -10,7 +12,7 @@ import fhi_util as fu
 
 def main(img_dir, weights):
     result_yolo = fu.yolo_detection(img_dir, weights)
-    fu.unet_detection(result_yolo)
+    fu.unet_detection(img_dir, result_yolo)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Yolo image detection process')
