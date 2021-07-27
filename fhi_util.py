@@ -8,10 +8,10 @@ import cv2
 import numpy as np
 
 import yolo
-import distance_estimator as de
-import img_coordinate as ic
 import fhi_unet as unet
-import geometry as ge
+import fhi_lib.distance_estimator as de
+import fhi_lib.img_coordinate as ic
+import fhi_lib.geometry as ge
 
 def yolo_detection(img_dir, weights):
 	img_dir = os.path.join(os.getcwd(), img_dir)

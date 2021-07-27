@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-from geometry import Point
+from fhi_lib.geometry import Point
 
 class ImgCoord():
 	def __init__(self, info):

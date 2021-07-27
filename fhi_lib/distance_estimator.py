@@ -7,7 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from functools import cmp_to_key
 
-from geometry import Point, Line
+from fhi_lib.geometry import Point, Line
 
 class DistanceEstimator():
 	def __init__(self, img):
