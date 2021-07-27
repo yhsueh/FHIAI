@@ -13,15 +13,13 @@ import fhi_lib.distance_estimator as de
 import fhi_lib.img_coordinate as ic
 import fhi_lib.geometry as ge
 
-def yolo_detection(img_dir, weights):
-	img_dir = os.path.join(os.getcwd(), img_dir)
-	yl = yolo.YOLO(model_path=weights)
+def yolo_detection(user_input):
+	img_dir = os.path.join(os.getcwd(), user_input['image_dir'])
+	yl_weight = os.path.join(os.getcwd(), user_input['yolo_weight'])
+	yl_output_dir = os.path.join(os.getcwd(), user_input['yolo_output_dir'])
+	
+	yl = yolo.YOLO(model_path=yl_weight)
 	yl_results = []
-
-	# create yolo_output_dir if it doesn't exist
-	yl_output_dir = os.path.join(img_dir, 'yolo_output')
-	if not os.path.exists(yl_output_dir):
-		os.mkdir(yl_output_dir)
 	
 	for img_path in glob.glob(img_dir + r'\*.jpg'):
 		print('Processing:', img_path)
@@ -36,6 +34,7 @@ def yolo_detection(img_dir, weights):
 		# add image path to yolo result dictionary
 		result.update({'img_path' : img_path})
 		yl_results.append(result)
+		break
 	return yl_results
 
 def create_masks(un, yl_results, un_output_dir):
@@ -89,24 +88,23 @@ def create_masks(un, yl_results, un_output_dir):
 	for yl_result in yl_results:
 		unet_crop(yl_result)
 
-def unet_detection(img_dir, yl_results):
-	# Create unet_output_dir if it doesn't exis
-	un_output_dir = os.path.join(img_dir, 'unet_output')
-	if not os.path.exists(un_output_dir):
-		os.mkdir(un_output_dir)
+def unet_detection(user_input, yl_results):
+	un_output_dir = user_input['unet_output_dir']
+	un_weight_dir = user_input['unet_weight_dir']
+	result_dir = user_input['result_dir']
 	
 	# Start unet detection
 	print('#### unet initialization completed ####')
-	un = unet.UNET()
+	un = unet.UNET(un_weight_dir)
 	un.initialize()
 	create_masks(un, yl_results, un_output_dir)
 	un.close_session()
 	
 	print('#### Begin computing real-world distance ####')
 	for yl_result in yl_results:
-		compute_distance(yl_result)
+		compute_distance(result_dir, yl_result)
 
-def compute_distance(yl_result):
+def compute_distance(result_dir, yl_result):
 	def resize_restoration(mask_itr_pt, cropped_shape):
 		unet_resize = 128
 		aspect_ratio = cropped_shape[1]/cropped_shape[0] #x/y
@@ -165,13 +163,8 @@ def compute_distance(yl_result):
 
 	print('Process completed')
 	img_path = yl_result['img_path']
-	
-	# create distance directory if it doesn't exist
-	distance_dir = os.path.join(os.path.dirname(img_path), 'distance')
-	if not os.path.exists(distance_dir):
-		os.mkdir(distance_dir)
+	save_path = os.path.join(result_dir, os.path.basename(img_path))
 
-	img_path = img_path.replace('dataset', r'dataset\distance')
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 	plt.imshow(img)
-	plt.savefig(img_path, dpi=300)
+	plt.savefig(save_path, dpi=300)

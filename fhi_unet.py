@@ -8,11 +8,9 @@ import tensorflow as tf
 import unet_utils as utils
 
 class UNET():
-    def __init__(self, model_path=None):
-        if model_path is None:
-            self.model_path = os.path.join(os.getcwd(), r'weights\unet\trained_model.ckpt')
-        else:
-            self.model_path = model_path
+    def __init__(self, model_dir):
+        model_dir = os.path.join(os.getcwd(), model_dir)
+        self.model_path =os.path.join(model_dir, 'trained_model.ckpt')
 
     def initialize(self):
         self.sess = tf.Session()  # tf.Session()

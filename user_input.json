@@ -1,0 +1,8 @@
+{
+  "yolo_weight": "weights\\yolo\\yolov3_608_0706__11_final.h5",
+  "unet_weight_dir": "weights\\unet",
+  "image_dir": "dataset\\image",
+  "yolo_output_dir": "dataset\\yolo_output",
+  "unet_output_dir": "dataset\\unet_output",
+  "result_dir": "dataset\\result"
+}
