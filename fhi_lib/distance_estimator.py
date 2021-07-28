@@ -49,12 +49,17 @@ class DistanceEstimator():
 		### Image Processing, convert rgb to hsv and find the scale by its color ###
 		blur = cv2.GaussianBlur(self.img, (5,5), 0)
 		img_hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
-		#img_threshold =  cv2.inRange(img_hsv, (25,30,100), (45,190,255))
-		img_threshold =  cv2.inRange(img_hsv, (25,60,190), (50,130,255))
+		img_threshold =  cv2.inRange(img_hsv, (45,10,227), (90,220,255))
 
-		morphology_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+		morphology_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
 		dilation = cv2.dilate(img_threshold, morphology_kernel, iterations=3)
 		thresh = cv2.erode(dilation, morphology_kernel, iterations=3)		
+
+		'''
+		compare_img = np.hstack((img_threshold,thresh))
+		plt.imshow(compare_img)
+		plt.show()
+		'''
 
 		### Crop the image as we know the scale is always on the left half of the image ###
 		cropped_thresh = thresh[:, 0:int(thresh.shape[1]/2)]
@@ -65,7 +70,7 @@ class DistanceEstimator():
 		### Discard contours that are not quadrilaterals and smaller than 4000 pixels###
 		result_contours = {}
 		epsilon = 30
-		minimal_area = 2000
+		minimal_area = 1000
 		for contour in contours:
 			contour_area = cv2.contourArea(contour)
 			if contour_area > minimal_area:
@@ -81,11 +86,10 @@ class DistanceEstimator():
 			self.near_scale = result_contours[key_list[0]]
 			self.far_scale = result_contours[key_list[1]]
 		else:
-			print('Contours Found', len(result_contours.keys()))
-			raise Exception('Error: More or fewer than two contours are found!')
+			raise Exception('Error: Two contours are expected, {} is found!'.format(len(result_contours.keys())))
 
 	def __verify_shape(self, result_contours):
-		tolerance = 0.40
+		tolerance = 0.55
 		remove_keys = []
 
 		for key in result_contours.keys():
@@ -122,27 +126,8 @@ class DistanceEstimator():
 				
 		self.origin = Point(self.near_scale[1])
 		self.vertical_pt = Point(self.near_scale[0])
-		self.horizontal_pt = Point(self.near_scale[2])
+		self.horizontal_pt = Point(self.near_scale[3])
 		self.vertical_pt2 = Point(self.far_scale[0])
-
-	def __set_orientation_approx(self, scale):
-		# Assuming the scale is placed on the left half of the image.
-		# The first vertex should be top left. If it's not the case, then reorder the verticies.
-		order = scale[:,0].argsort()
-		if order[0].astype(int) == 0:
-			## 3 2 ##
-			## 0 1 ##
-			# The first vertex is at bottom left instead of top left. Reorder the verticies.
-			scale = scale[[3,0,1,2]]
-		elif order[0].astype(int) == 2:
-			## 1 0 ##
-			## 2 3 ##
-			scale = scale[[1,2,3,0]]
-		elif order[0].astype(int) == 3:
-			## 2 1 ##
-			## 3 0 ## 
-			scale = scale[[2,3,1,0]]
-		return scale
 
 	def __set_orientation_hull(self, scale):
 		# Assuming the scale is placed on the left half of the image.
@@ -172,9 +157,10 @@ class DistanceEstimator():
 		math_origin = self.origin.switch_coordinate_system(self.img)
 		math_horizontal_pt = self.horizontal_pt.switch_coordinate_system(self.img)
 		math_vertical_pt2 = self.vertical_pt2.switch_coordinate_system(self.img)
+		math_vertical_pt = self.vertical_pt.switch_coordinate_system(self.img)
 
 		self.vertical_reference_line = Line(math_origin, math_vertical_pt2)
-		self.horizontal_reference_line = Line(math_origin, math_horizontal_pt)
+		self.horizontal_reference_line = Line(math_vertical_pt, math_horizontal_pt)
 
 	def __shift_accessory_coordinate(self, pt):
 		math_pt = pt.switch_coordinate_system(self.img) 
