@@ -164,7 +164,8 @@ def compute_distance(result_dir, yl_result):
 	print('Process completed')
 	img_path = yl_result['img_path']
 	save_path = os.path.join(result_dir, os.path.basename(img_path))
-
+	ax.text(img.shape[1]/2-600, img.shape[0]-40, os.path.splitext(os.path.basename(img_path))[0],
+	 color='white', weight='bold', size=6, va='center', backgroundcolor='none')
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 	plt.imshow(img)
 	plt.savefig(save_path, dpi=300)
